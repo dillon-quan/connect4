@@ -80,7 +80,9 @@ class Game:
                 if self.board.is_valid_column(col):
                     return col
                 else:
-                    print("Column is either full or you have chosen an invalid column. Please enter a different column.")
+                    print(
+                        "Column is either full or you have chosen an invalid column. Please enter a different column."
+                    )
             except Exception as e:
                 print(f"An error occurred: {e}")
 

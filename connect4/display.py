@@ -1,10 +1,10 @@
 import numpy as np
 
 # ANSI color codes
-_YELLOW = "\033[0;37;43m"   # human pieces
-_RED    = "\033[0;37;41m"   # bot pieces
-_BLUE   = "\033[0;32;44m"   # empty cells / header
-_RESET  = "\033[0m"
+_YELLOW = "\033[0;37;43m"  # human pieces
+_RED = "\033[0;37;41m"  # bot pieces
+_BLUE = "\033[0;32;44m"  # empty cells / header
+_RESET = "\033[0m"
 
 
 def print_board(grid: np.ndarray) -> None:

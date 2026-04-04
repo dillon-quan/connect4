@@ -153,7 +153,7 @@ class Bot:
           - All horizontal, vertical, and diagonal windows of length 4
 
         Args:
-            board (Board): the board instance 
+            board (Board): the board instance
 
         Returns:
             float: the total score of the board state
@@ -205,7 +205,7 @@ class Bot:
             (i.e [1, 0, 1, 1])
 
         Returns:
-            float: a score based on the placement of the pieces in the window 
+            float: a score based on the placement of the pieces in the window
         """
         bot_count = window.count(BOT)
         human_count = window.count(HUMAN)
