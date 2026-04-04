@@ -16,7 +16,7 @@ class Bot:
 
     Design notes
     ------------
-    - ``difficulty`` controls the minimax search depth.  Depth 4 gives
+    - ``depth`` controls the minimax search depth.  Depth 4 gives
       a strong casual opponent without noticeable latency.
     - ``_score_window`` assigns local scores to every window of 4 cells,
       which ``_score_position`` aggregates across all rows, columns, and
@@ -35,7 +35,13 @@ class Bot:
     def get_move(self, board: Board) -> int:
         """Return the column index of the best move for the bot.
 
-        Uses minimax with alpha-beta pruning up to *self.depth* plies.
+        Uses minimax with alpha-beta pruning up to based on the set depth.
+
+        Args:
+            board (Board): the current board
+
+        Returns:
+            int: the column from minimax
         """
         return self._minimax(
             board=board, depth=self.depth, alpha=-np.inf, beta=np.inf, maximizing=True
@@ -54,22 +60,17 @@ class Bot:
         maximizing: bool,
     ) -> tuple[Optional[int], float]:
         """Minimax search with alpha-beta pruning.
+        A branch is pruned with alpha >= beta.
 
-        Parameters
-        ----------
-        board:
-            Current board state.
-        depth:
-            Remaining search depth.
-        alpha / beta:
-            Alpha-beta bounds.
-        maximizing:
-            True when it is the bot's turn to move.
+        Args:
+            board (Board): current board state.
+            depth (int): remaining search depth.
+            alpha (float): value to keep track to determine to prune branches
+            beta (float): value to keep track to determine to prune branches
+            maximizing (bool): True when it is the bot's turn to move and False when its the human turn.
 
-        Returns
-        -------
-        (best_col, score)
-            ``best_col`` is None at terminal nodes.
+        Returns:
+            tuple[Optional[int], float]: (best_column, best_score)
         """
 
         # --- Terminal nodes ---
@@ -150,6 +151,12 @@ class Bot:
         Evaluation considers:
           - Centre column occupancy (positional advantage)
           - All horizontal, vertical, and diagonal windows of length 4
+
+        Args:
+            board (Board): the board instance 
+
+        Returns:
+            float: the total score of the board state
         """
         score = 0.0
         grid = board.grid
@@ -192,6 +199,13 @@ class Bot:
 
         Mixed windows (both players present) score 0 — neither side can
         complete a four-in-a-row through that window.
+
+        Args:
+            window (list[int]): a list of length 4 with player piece values
+            (i.e [1, 0, 1, 1])
+
+        Returns:
+            float: a score based on the placement of the pieces in the window 
         """
         bot_count = window.count(BOT)
         human_count = window.count(HUMAN)

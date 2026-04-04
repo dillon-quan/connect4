@@ -14,8 +14,7 @@ class Board:
         self._grid: np.ndarray = (
             grid if grid is not None else np.zeros((ROWS, COLS), dtype=int)
         )
-        # Tracks the next available row index (from bottom) for each column.
-        # When a column is full, the value drops below 0.
+        # used to track the remaining spaces left for a given column. < 0 means no remaining space
         self._col_heights: dict[int, int] = (
             col_heights
             if col_heights is not None
@@ -31,16 +30,23 @@ class Board:
     # ------------------------------------------------------------------
 
     def is_valid_column(self, col: int) -> bool:
-        """Return True if the column is in bounds and has at least one empty slot."""
+        """Checks whether the col is a valid next move.
+
+        Args:
+            col (int): a chosen col by the human or bot.
+
+        Returns:
+            bool: Return True if the column is in bounds and has at least one empty slot and False otherwise.
+        """
         return 0 <= col < COLS and self._col_heights[col] >= 0
 
     def get_valid_columns(self) -> list[int]:
-        """Return a list of all columns that can still accept a piece. Need it for Minimax."""
-        return [col for col in range(COLS) if self.is_valid_column(col)]
+        """Return a list of all columns that can still accept a piece. This method is needed for minimax when iterating through valid options.
 
-    def get_next_open_row(self, col: int) -> int:
-        """Return the row index where the next piece will land in *col*. Need it for Minimax."""
-        return self._col_heights[col]
+        Returns:
+            list[int]: a list of valid columns based on the current board state
+        """
+        return [col for col in range(COLS) if self.is_valid_column(col)]
 
     def insert_piece(self, col: int, player: int) -> None:
         """Drop a piece for *player* into *col*, updating internal state."""
@@ -52,7 +58,14 @@ class Board:
     # ------------------------------------------------------------------
 
     def check_win(self, player: int) -> bool:
-        """Return True if *player* has four checkers in a row."""
+        """Return True if *player* has four checkers in a row.
+
+        Args:
+            player (int): player piece
+
+        Returns:
+            bool: Return True if any of the winning conditions are met and False otherwise.
+        """
         return (
             self._check_horizontal(player)
             or self._check_vertical(player)
@@ -60,7 +73,11 @@ class Board:
         )
 
     def is_draw(self) -> bool:
-        """Return True if the board is completely full (no winner)."""
+        """Checks whether the board is full.
+
+        Returns:
+            bool: Return True if the board is completely full (no winner) and False otherwise.
+        """
         return all(list(map(lambda x: x < 0, self._col_heights.values())))
 
     # ------------------------------------------------------------------
@@ -68,7 +85,14 @@ class Board:
     # ------------------------------------------------------------------
 
     def _check_horizontal(self, player: int) -> bool:
-        """Scan every row for four consecutive pieces belonging to *player*."""
+        """Scan every row for four consecutive pieces belonging to *player*.
+
+        Args:
+            player (int): player piece
+
+        Returns:
+            bool: Returns True if there is a connect4 in the horizontal direction and False otherwise.
+        """
         for row in range(ROWS):
             for col in range(COLS - 3):
                 if (self._grid[row, col : col + 4] == player).all():
@@ -76,7 +100,14 @@ class Board:
         return False
 
     def _check_vertical(self, player: int) -> bool:
-        """Scan every column for four consecutive pieces belonging to *player*."""
+        """Scan every column for four consecutive pieces belonging to *player*.
+
+        Args:
+            player (int): player piece
+
+        Returns:
+            bool: Returns True if there is a connect4 in the vertical direction and False otherwise.
+        """
         for col in range(COLS):
             for row in range(ROWS - 3):
                 if (self._grid[row : row + 4, col] == player).all():
@@ -84,7 +115,14 @@ class Board:
         return False
 
     def _check_diagonal(self, player: int) -> bool:
-        """Scan both diagonal directions for four consecutive pieces belonging to *player*."""
+        """Scan both diagonal directions for four consecutive pieces belonging to *player*.
+
+        Args:
+            player (int): player piece
+
+        Returns:
+            bool: Returns True if theres a connect4 from the diagonal of the 4x4 grid and False otherwise.
+        """
         for row in range(ROWS - 3):
             for col in range(COLS - 3):
                 board_window = self._grid[row : row + 4, col : col + 4]
@@ -99,5 +137,9 @@ class Board:
     # ------------------------------------------------------------------
 
     def copy(self) -> "Board":
-        """Return an independent deep copy of this board (used by the bot for lookahead)."""
+        """Return an independent deep copy of this board (used by the bot during minimax algo).
+
+        Returns:
+            Board: a new instance of board with a deep copy of the board state
+        """
         return Board(grid=self._grid.copy(), col_heights=self._col_heights.copy())

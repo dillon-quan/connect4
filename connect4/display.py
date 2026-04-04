@@ -1,10 +1,10 @@
 import numpy as np
 
 # ANSI color codes
-_YELLOW = "\033[0;37;43m"  # human pieces
-_RED = "\033[0;37;41m"  # bot pieces
-_BLUE = "\033[0;32;44m"  # empty cells / header
-_RESET = "\033[0m"
+_YELLOW = "\033[0;37;43m"   # human pieces
+_RED    = "\033[0;37;41m"   # bot pieces
+_BLUE   = "\033[0;32;44m"   # empty cells / header
+_RESET  = "\033[0m"
 
 
 def print_board(grid: np.ndarray) -> None:
@@ -14,6 +14,9 @@ def print_board(grid: np.ndarray) -> None:
       - 0  → empty (blue background)
       - 1  → human piece (yellow background)
       - 2  → bot piece (red background)
+
+    Args:
+        grid (np.ndarray): the current board state of the game
     """
     print(f"{_BLUE} 0  1  2  3  4  5  6 {_RESET}")
     for row in grid:
@@ -34,12 +37,20 @@ def print_welcome() -> None:
 
 
 def print_turn(player_name: str) -> None:
-    """Announce whose turn it is."""
+    """Announce whose turn it is.
+
+    Args:
+        player_name (str): HUMAN or BOT
+    """
     print(f"{player_name}'s turn")
 
 
 def print_winner(player_name: str) -> None:
-    """Announce the winner at the end of the game."""
+    """Announce the winner at the end of the game.
+
+    Args:
+        player_name (str): HUMAN or BOT
+    """
     print(f"{player_name} wins!")
 
 
