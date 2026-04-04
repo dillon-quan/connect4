@@ -219,5 +219,7 @@ class Bot:
             return _TWO_SCORE
         if human_count == 3 and empty_count == 1:
             return -_THREE_SCORE
+        if human_count == 2 and empty_count == 2:
+            return -_TWO_SCORE
 
         return 0.0
