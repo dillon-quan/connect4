@@ -10,11 +10,17 @@ BOT = 2
 class Board:
     """Represents the Connect 4 game board and enforces game rules."""
 
-    def __init__(self) -> None:
-        self._grid: np.ndarray = np.zeros((ROWS, COLS), dtype=int)
+    def __init__(self, grid=None, col_heights=None) -> None:
+        self._grid: np.ndarray = (
+            grid if grid is not None else np.zeros((ROWS, COLS), dtype=int)
+        )
         # Tracks the next available row index (from bottom) for each column.
         # When a column is full, the value drops below 0.
-        self._col_heights: dict[int, int] = {col: ROWS - 1 for col in range(COLS)}
+        self._col_heights: dict[int, int] = (
+            col_heights
+            if col_heights is not None
+            else {col: ROWS - 1 for col in range(COLS)}
+        )
 
     @property
     def grid(self) -> np.ndarray:
@@ -47,12 +53,16 @@ class Board:
 
     def check_win(self, player: int) -> bool:
         """Return True if *player* has four checkers in a row."""
-        return self._check_horizontal(player) or self._check_vertical(player) or self._check_diagonal(player)
+        return (
+            self._check_horizontal(player)
+            or self._check_vertical(player)
+            or self._check_diagonal(player)
+        )
 
     def is_draw(self) -> bool:
         """Return True if the board is completely full (no winner)."""
         return all(list(map(lambda x: x < 0, self._col_heights.values())))
-        
+
     # ------------------------------------------------------------------
     # Private win helpers
     # ------------------------------------------------------------------
@@ -60,31 +70,34 @@ class Board:
     def _check_horizontal(self, player: int) -> bool:
         """Scan every row for four consecutive pieces belonging to *player*."""
         for row in range(ROWS):
-            for col in range(COLS-3):
-                if (self._grid[row, col:col+4] == player).all():
+            for col in range(COLS - 3):
+                if (self._grid[row, col : col + 4] == player).all():
                     return True
         return False
 
     def _check_vertical(self, player: int) -> bool:
         """Scan every column for four consecutive pieces belonging to *player*."""
         for col in range(COLS):
-            for row in range(ROWS-3):
-                if (self._grid[row:row+4, col] == player).all():
+            for row in range(ROWS - 3):
+                if (self._grid[row : row + 4, col] == player).all():
                     return True
         return False
 
     def _check_diagonal(self, player: int) -> bool:
         """Scan both diagonal directions for four consecutive pieces belonging to *player*."""
-        for row in range(ROWS-3):
-            for col in range(COLS-3):
-                board_window = self._grid[row:row+4, col:col+4]
-                if (np.diagonal(board_window) == player).all() or (np.diagonal(np.fliplr(board_window)) == player).all():
+        for row in range(ROWS - 3):
+            for col in range(COLS - 3):
+                board_window = self._grid[row : row + 4, col : col + 4]
+                if (np.diagonal(board_window) == player).all() or (
+                    np.diagonal(np.fliplr(board_window)) == player
+                ).all():
                     return True
         return False
+
     # ------------------------------------------------------------------
     # Utility
     # ------------------------------------------------------------------
 
     def copy(self) -> "Board":
         """Return an independent deep copy of this board (used by the bot for lookahead)."""
-        pass
+        return Board(grid=self._grid.copy(), col_heights=self._col_heights.copy())

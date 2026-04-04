@@ -17,9 +17,13 @@ class Game:
     Responsibilities
     ----------------
     - Initialise the board and bot.
-    - Randomly decide who moves first (mirrors original main.py behaviour).
-    - Drive the turn loop: prompt human input → bot decision → board update
-      → win/draw check → repeat.
+    - Randomly decide who moves first.
+    - Drive the turn loop to perform the following actions:
+      - determine current player
+      - prompt human/bot for column choice
+      - insert piece into board
+      - win/draw check
+      - swap player
     - Delegate rendering entirely to display.py.
     """
 
@@ -82,17 +86,20 @@ class Game:
 
     def _handle_bot_turn(self) -> int:
         """Ask the bot for its chosen column and return it."""
-        while True:
-            try:
-                col = int(input("Enter a column (0-6): "))
-                if self.board.is_valid_column(col):
-                    return col
-                else:
-                    print("Column is full. Please enter a different column.")
-            except ValueError:
-                print("Invalid input. Please enter a number between 0 and 6.")
-            except Exception as e:
-                print(f"An error occurred: {e}")
+        board_copy = self.board.copy()
+        return self.bot.get_move(board_copy)
+
+        # while True:
+        #     try:
+        #         col = int(input("Enter a column (0-6): "))
+        #         if self.board.is_valid_column(col):
+        #             return col
+        #         else:
+        #             print("Column is full. Please enter a different column.")
+        #     except ValueError:
+        #         print("Invalid input. Please enter a number between 0 and 6.")
+        #     except Exception as e:
+        #         print(f"An error occurred: {e}")
 
     # ------------------------------------------------------------------
     # Helpers
