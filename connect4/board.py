@@ -30,7 +30,7 @@ class Board:
     # ------------------------------------------------------------------
 
     def is_valid_column(self, col: int) -> bool:
-        """Checks whether the col is a valid next move.
+        """Checks whether the chosen column is valid.
 
         Args:
             col (int): a chosen col by the human or bot.

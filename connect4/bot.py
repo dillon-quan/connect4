@@ -65,8 +65,8 @@ class Bot:
         Args:
             board (Board): current board state.
             depth (int): remaining search depth.
-            alpha (float): value to keep track to determine to prune branches
-            beta (float): value to keep track to determine to prune branches
+            alpha (float): value to keep track to determine to prune branches, initialize to -inf
+            beta (float): value to keep track to determine to prune branches, initialize to inf
             maximizing (bool): True when it is the bot's turn to move and False when its the human turn.
 
         Returns:
