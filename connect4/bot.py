@@ -43,9 +43,24 @@ class Bot:
         Returns:
             int: the column from minimax
         """
-        return self._minimax(
+        col = self._minimax(
             board=board, depth=self.depth, alpha=-np.inf, beta=np.inf, maximizing=True
         )[0]
+
+        # depth=0 skips move selection entirely and returns None for the column.
+        # Fall back to picking the valid column with the highest heuristic score.
+        if col is None:
+            col = max(
+                board.get_valid_columns(),
+                key=lambda c: self._score_after(board, c),
+            )
+        return col
+
+    def _score_after(self, board: Board, col: int) -> float:
+        """Return the heuristic score of *board* after dropping a BOT piece in *col*."""
+        copy = board.copy()
+        copy.insert_piece(col, BOT)
+        return self._score_position(copy)
 
     # ------------------------------------------------------------------
     # Minimax
