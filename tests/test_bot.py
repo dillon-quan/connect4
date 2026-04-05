@@ -32,9 +32,40 @@ class TestGetMove:
         bot = Bot(depth=3)
         grid = np.zeros((ROWS, COLS), dtype=int)
         grid[5, 0:3] = HUMAN
+        grid[4, 0:2] = BOT
         col_heights = {col: ROWS - 1 for col in range(COLS)}
         col_heights[0] = col_heights[1] = col_heights[2] = ROWS - 2
+        col_heights[0] = col_heights[1] = ROWS - 3
         board = Board(grid=grid, col_heights=col_heights)
+
+        assert bot.get_move(board) == 3
+
+    def test_takes_win_over_blocking(self):
+        # BOT can win vertically in col 0 (rows 3–5 already filled).
+        # HUMAN threatens horizontally at row 5 cols 3–5 and would win at col 6.
+        # Bot must choose its own win (col 0) rather than block (col 6).
+        # depth=1 is enough: the heuristic scores the vertical [BOT]*4 as _WIN_SCORE.
+        bot = Bot(depth=1)
+        grid = np.zeros((ROWS, COLS), dtype=int)
+        grid[5, 0] = BOT
+        grid[4, 0] = BOT
+        grid[3, 0] = BOT
+        grid[5, 3] = HUMAN
+        grid[5, 4] = HUMAN
+        grid[5, 5] = HUMAN
+        col_heights = {col: ROWS - 1 for col in range(COLS)}
+        col_heights[0] = ROWS - 4        # rows 3,4,5 taken — next piece lands at row 2
+        col_heights[3] = col_heights[4] = col_heights[5] = ROWS - 2
+        board = Board(grid=grid, col_heights=col_heights)
+
+        assert bot.get_move(board) == 0
+
+    def test_prefers_centre_column_as_first_move(self):
+        # On an empty board at depth=1 every column produces windows with only
+        # one piece, which score 0. The sole differentiator is the centre-column
+        # bonus (+_CENTER_BONUS) applied to col 3, making it uniquely optimal.
+        bot = Bot(depth=1)
+        board = Board()
 
         assert bot.get_move(board) == 3
 
