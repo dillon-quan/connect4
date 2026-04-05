@@ -89,9 +89,6 @@ class Bot:
         """
 
         # --- Terminal nodes ---
-        if depth == 0:
-            return None, self._score_position(board)
-
         if board.is_draw():
             return None, 0
 
@@ -100,6 +97,9 @@ class Bot:
 
         if board.check_win(HUMAN):
             return None, -_WIN_SCORE
+
+        if depth == 0:
+            return None, self._score_position(board)
 
         # --- Recursive case ---
         valid_columns = board.get_valid_columns()
