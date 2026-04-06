@@ -57,7 +57,16 @@ class Bot:
         return col
 
     def _score_after(self, board: Board, col: int) -> float:
-        """Return the heuristic score of *board* after dropping a BOT piece in *col*."""
+        """Return the heuristic score of board after dropping a BOT piece in col.
+        This is for when depth=0.
+
+        Args:
+            board (Board): board instance with the current state
+            col (int): chosen column for placement
+
+        Returns:
+            float: the score after insertion
+        """
         copy = board.copy()
         copy.insert_piece(col, BOT)
         return self._score_position(copy)

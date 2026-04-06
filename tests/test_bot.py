@@ -1,5 +1,5 @@
+import time
 import numpy as np
-import pytest
 
 from connect4.board import Board, HUMAN, BOT, EMPTY, ROWS, COLS
 from connect4.bot import Bot, _WIN_SCORE, _THREE_SCORE, _TWO_SCORE
@@ -77,6 +77,12 @@ class TestGetMove:
         col = bot.get_move(board)
         assert col != 3
 
+    def test_get_move_is_fast_enough(self):
+        bot = Bot(depth=4)
+        board = Board()
+        start = time.time()
+        bot.get_move(board)
+        assert time.time() - start < 1.0
 
 class TestScoreWindow:
     def setup_method(self):
