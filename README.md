@@ -33,8 +33,6 @@ connect_4/
 # Install uv if you don't have it
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Clone the repo and navigate into it
-git clone <repo-url>
 cd connect_4
 
 # Create a virtual environment and install dependencies
@@ -44,7 +42,6 @@ uv sync
 ### Using pip
 
 ```bash
-git clone <repo-url>
 cd connect_4
 
 python -m venv .venv
