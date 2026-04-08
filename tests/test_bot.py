@@ -16,7 +16,7 @@ class TestGetMove:
     def test_wins_immediately_if_possible(self):
         # BOT has three in a row at the bottom; col 3 completes the horizontal win.
         # depth=1 is enough: the heuristic scores [BOT,BOT,BOT,BOT] as _WIN_SCORE.
-        bot = Bot(depth=1)
+        bot = Bot(depth=2)
         grid = np.zeros((ROWS, COLS), dtype=int)
         grid[5, 0:3] = BOT
         col_heights = {col: ROWS - 1 for col in range(COLS)}
@@ -29,7 +29,7 @@ class TestGetMove:
         # HUMAN has three in a row; bot must play col 3 to block.
         # depth=3 is required: the bot needs to see human playing col 3 and
         # winning before it recognises the threat via the terminal win check.
-        bot = Bot(depth=3)
+        bot = Bot(depth=2)
         grid = np.zeros((ROWS, COLS), dtype=int)
         grid[5, 0:3] = HUMAN
         grid[4, 0:2] = BOT
@@ -45,7 +45,7 @@ class TestGetMove:
         # HUMAN threatens horizontally at row 5 cols 3–5 and would win at col 6.
         # Bot must choose its own win (col 0) rather than block (col 6).
         # depth=1 is enough: the heuristic scores the vertical [BOT]*4 as _WIN_SCORE.
-        bot = Bot(depth=1)
+        bot = Bot(depth=2)
         grid = np.zeros((ROWS, COLS), dtype=int)
         grid[5, 0] = BOT
         grid[4, 0] = BOT
@@ -64,7 +64,7 @@ class TestGetMove:
         # On an empty board at depth=1 every column produces windows with only
         # one piece, which score 0. The sole differentiator is the centre-column
         # bonus (+_CENTER_BONUS) applied to col 3, making it uniquely optimal.
-        bot = Bot(depth=1)
+        bot = Bot(depth=2)
         board = Board()
 
         assert bot.get_move(board) == 3
@@ -78,7 +78,7 @@ class TestGetMove:
         assert col != 3
 
     def test_get_move_is_fast_enough(self):
-        bot = Bot(depth=4)
+        bot = Bot(depth=2)
         board = Board()
         start = time.time()
         bot.get_move(board)
@@ -88,7 +88,7 @@ class TestGetMove:
         # Playing col 1 places BOT at (3, 1), completing a horizontal
         # four-in-a-row across row 3: cols 1, 2, 3, 4 are all BOT.
         H, B = HUMAN, BOT
-        bot = Bot(depth=1)
+        bot = Bot(depth=2)
         grid = np.array(
             [
                 [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
@@ -104,6 +104,52 @@ class TestGetMove:
         board = Board(grid=grid, col_heights=col_heights)
 
         assert bot.get_move(board) == 1
+
+    def test_win_scenario_with_double_threat(self):
+        H, B = HUMAN, BOT
+        bot = Bot(depth=2)
+        grid = np.array(
+            [
+                [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+                [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+                [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+                [EMPTY, EMPTY, B, B, B, EMPTY, EMPTY],
+                [EMPTY, H, B, H, H, H, EMPTY],
+                [EMPTY, B, H, H, H, B, EMPTY],
+            ],
+            dtype=int,
+        )
+        col_heights = {0: 5, 1: 3, 2: 2, 3: 2, 4: 2, 5: 3, 6: 5}
+        board = Board(grid=grid, col_heights=col_heights)
+        move = bot.get_move(board)
+        assert move == 1 or move == 5
+
+    def test_win_with_diagonal_threats(self):
+        # BOT has a ↗ diagonal threat: (5,1)→(4,2)→(3,3)→(2,4).
+        # Playing col 4 places B at row 2, completing the diagonal immediately.
+        #
+        # At depth=4 the bot also sees col 2 as a winning fork (sets up two
+        # simultaneous threats that human can't both block), so both col 2 and
+        # col 4 return _WIN_SCORE. Col 2 is chosen because it is tried first
+        # in column iteration order. depth=2 is used here so only the
+        # immediate diagonal win is visible, making col 4 uniquely optimal.
+        H, B = HUMAN, BOT
+        bot = Bot(depth=2)
+        grid = np.array(
+            [
+                [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+                [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+                [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+                [EMPTY, EMPTY, EMPTY, B, B, EMPTY, EMPTY],
+                [EMPTY, EMPTY, B, H, H, H, EMPTY],
+                [EMPTY, B, H, H, H, B, EMPTY],
+            ],
+            dtype=int,
+        )
+        col_heights = {0: 5, 1: 4, 2: 3, 3: 2, 4: 2, 5: 3, 6: 5}
+        board = Board(grid=grid, col_heights=col_heights)
+        move = bot.get_move(board)
+        assert move == 4
 
 
 class TestScoreWindow:

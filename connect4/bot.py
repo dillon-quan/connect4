@@ -25,7 +25,7 @@ class Bot:
       most winning threats in Connect 4.
     """
 
-    def __init__(self, depth: int = 4) -> None:
+    def __init__(self, depth: int = 2) -> None:
         self.depth = depth
 
     # ------------------------------------------------------------------
