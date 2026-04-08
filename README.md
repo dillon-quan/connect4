@@ -37,6 +37,7 @@ cd connect_4
 
 # Create a virtual environment and install dependencies
 uv sync
+source .venv/bin/activate 
 ```
 
 ### Using pip
@@ -45,9 +46,10 @@ uv sync
 cd connect_4
 
 python -m venv .venv
-source .venv/bin/activate      # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 
 pip install numpy
+pip install pytest
 ```
 
 ## How to Play
