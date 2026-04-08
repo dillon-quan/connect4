@@ -133,11 +133,11 @@ class TestRunLoop:
         grid = np.array(
             [
                 [EMPTY, B, H, B, H, B, H],
-                [H,     B, H, B, H, B, H],
-                [B,     H, B, H, B, H, B],
-                [B,     H, B, H, B, H, B],
-                [H,     B, H, B, H, B, H],
-                [H,     B, H, B, H, B, H],
+                [H, B, H, B, H, B, H],
+                [B, H, B, H, B, H, B],
+                [B, H, B, H, B, H, B],
+                [H, B, H, B, H, B, H],
+                [H, B, H, B, H, B, H],
             ],
             dtype=int,
         )

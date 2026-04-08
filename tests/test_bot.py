@@ -54,7 +54,7 @@ class TestGetMove:
         grid[5, 4] = HUMAN
         grid[5, 5] = HUMAN
         col_heights = {col: ROWS - 1 for col in range(COLS)}
-        col_heights[0] = ROWS - 4        # rows 3,4,5 taken — next piece lands at row 2
+        col_heights[0] = ROWS - 4  # rows 3,4,5 taken — next piece lands at row 2
         col_heights[3] = col_heights[4] = col_heights[5] = ROWS - 2
         board = Board(grid=grid, col_heights=col_heights)
 
@@ -83,6 +83,28 @@ class TestGetMove:
         start = time.time()
         bot.get_move(board)
         assert time.time() - start < 1.0
+
+    def test_wins_with_horizontal_on_mid_game_board(self):
+        # Playing col 1 places BOT at (3, 1), completing a horizontal
+        # four-in-a-row across row 3: cols 1, 2, 3, 4 are all BOT.
+        H, B = HUMAN, BOT
+        bot = Bot(depth=1)
+        grid = np.array(
+            [
+                [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+                [EMPTY, EMPTY, H, B, EMPTY, EMPTY, EMPTY],
+                [EMPTY, EMPTY, B, H, H, EMPTY, EMPTY],
+                [EMPTY, EMPTY, B, B, B, H, EMPTY],
+                [EMPTY, B, B, H, H, H, EMPTY],
+                [EMPTY, B, H, H, H, B, EMPTY],
+            ],
+            dtype=int,
+        )
+        col_heights = {0: 5, 1: 3, 2: 0, 3: 0, 4: 1, 5: 2, 6: 5}
+        board = Board(grid=grid, col_heights=col_heights)
+
+        assert bot.get_move(board) == 1
+
 
 class TestScoreWindow:
     def setup_method(self):
@@ -177,12 +199,16 @@ class TestMinimax:
 
     def test_depth_zero_returns_no_column(self):
         board = Board()
-        col, _ = self.bot._minimax(board, depth=0, alpha=-np.inf, beta=np.inf, maximizing=True)
+        col, _ = self.bot._minimax(
+            board, depth=0, alpha=-np.inf, beta=np.inf, maximizing=True
+        )
         assert col is None
 
     def test_depth_zero_returns_heuristic_score(self):
         board = Board()
-        _, score = self.bot._minimax(board, depth=0, alpha=-np.inf, beta=np.inf, maximizing=True)
+        _, score = self.bot._minimax(
+            board, depth=0, alpha=-np.inf, beta=np.inf, maximizing=True
+        )
         assert score == self.bot._score_position(board)
 
     def test_detects_bot_win_terminal(self):
@@ -190,7 +216,9 @@ class TestMinimax:
         grid = np.zeros((ROWS, COLS), dtype=int)
         grid[5, 0:4] = BOT
         board = Board(grid=grid)
-        col, score = self.bot._minimax(board, depth=4, alpha=-np.inf, beta=np.inf, maximizing=True)
+        col, score = self.bot._minimax(
+            board, depth=4, alpha=-np.inf, beta=np.inf, maximizing=True
+        )
         assert col is None
         assert score == _WIN_SCORE
 
@@ -198,7 +226,9 @@ class TestMinimax:
         grid = np.zeros((ROWS, COLS), dtype=int)
         grid[5, 0:4] = HUMAN
         board = Board(grid=grid)
-        col, score = self.bot._minimax(board, depth=4, alpha=-np.inf, beta=np.inf, maximizing=False)
+        col, score = self.bot._minimax(
+            board, depth=4, alpha=-np.inf, beta=np.inf, maximizing=False
+        )
         assert col is None
         assert score == -_WIN_SCORE
 
@@ -218,13 +248,39 @@ class TestMinimax:
         )
         col_heights = {col: -1 for col in range(COLS)}
         board = Board(grid=grid, col_heights=col_heights)
-        col, score = self.bot._minimax(board, depth=4, alpha=-np.inf, beta=np.inf, maximizing=True)
+        col, score = self.bot._minimax(
+            board, depth=4, alpha=-np.inf, beta=np.inf, maximizing=True
+        )
         assert col is None
         assert score == 0
 
     def test_maximizing_returns_a_column(self):
         # At depth > 0 on a non-terminal board, minimax must pick a column.
         board = Board()
-        col, _ = self.bot._minimax(board, depth=1, alpha=-np.inf, beta=np.inf, maximizing=True)
+        col, _ = self.bot._minimax(
+            board, depth=1, alpha=-np.inf, beta=np.inf, maximizing=True
+        )
         assert col is not None
         assert 0 <= col < COLS
+
+    def test_result_matches_exhaustive_search_at_depth_1(self):
+        # Alpha-beta must return the same column and score as a brute-force
+        # evaluation of every valid move via the heuristic. If pruning ever
+        # incorrectly discards the best branch this will catch it.
+        board = Board()
+
+        best_brute_col, best_brute_score = None, -np.inf
+        for col in board.get_valid_columns():
+            copy = board.copy()
+            copy.insert_piece(col, BOT)
+            score = self.bot._score_position(copy)
+            if score > best_brute_score:
+                best_brute_score = score
+                best_brute_col = col
+
+        ab_col, ab_score = self.bot._minimax(
+            board, depth=1, alpha=-np.inf, beta=np.inf, maximizing=True
+        )
+
+        assert ab_col == best_brute_col
+        assert ab_score == best_brute_score
